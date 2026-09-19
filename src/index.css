@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-scale: 100%;
+  }
+
+  html {
+    font-size: var(--font-scale);
+  }
+
+  body {
+    font-family: 'Source Sans 3', Inter, system-ui, -apple-system, sans-serif;
+    color: #1e293b;
+    background-color: #f8fafc;
+  }
+
+  /* High contrast mode support */
+  body.high-contrast {
+    filter: contrast(115%);
+    background-color: #ffffff;
+    color: #000000;
+  }
+}
+
+/* Custom Print styles for Official Referral Slip */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-referral-slip, .printable-referral-slip * {
+    visibility: visible;
+  }
+  .printable-referral-slip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: white;
+    color: black;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Official Government Strip */
+.gov-strip-pattern {
+  background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%, #138808 100%);
+  height: 4px;
+  width: 100%;
+}
+
+/* Subtle Indian Ashoka Watermark / Emblem container */
+.gov-stamp-border {
+  border: 2px dashed #123B63;
+}
+
+/* Clean scrollbar for data tables */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
