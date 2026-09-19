@@ -26,6 +26,13 @@ export const en = {
 
   // Hero Section
   heroBadge: 'National Rural Health Continuity Initiative',
+  heroTitle: 'KAVACH CARE – AI-Assisted Rural Healthcare Navigation & Referral Continuity Platform',
+  heroSubtitle: 'Connecting rural citizens, frontline ASHA workers, Ayushman Arogya Mandirs, Primary & Community Health Centres, and District Hospitals into a reliable, closed-loop referral network.',
+  btnStartCare: 'Start Care Navigation',
+  btnExploreHow: 'Explore How It Works',
+  trustStatement: 'Connected care from village to referral hospital',
+  highlightTag: 'Continuity of Care Guarantee',
+  highlightDesc: 'Every patient referral carries verified clinical context, vitals history, destination facility readiness, and transport coordination.',
   heroHeadline: 'One Patient. One Connected Journey.',
   heroSubheadline: 'Connecting rural patients, frontline ASHA workers, Primary Health Centres (PHC), Community Health Centres (CHC), and District Hospitals into a closed-loop continuum.',
   ctaStartJourney: 'Start Care Journey',

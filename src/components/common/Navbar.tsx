@@ -8,7 +8,7 @@ interface NavbarProps {
   onOpenTriage?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenTriage }) => {
+export const Navbar: React.FC<NavbarProps> = () => {
   const { language, setLanguage, t } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -162,29 +162,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTriage }) => {
                 </button>
               </div>
             ) : (
-              <Link
-                to="/login"
-                className="text-xs xl:text-sm font-semibold text-emerald-100 hover:text-white px-3 py-1.5 rounded-lg hover:bg-emerald-900/50 transition-colors"
-              >
-                {t('login', 'Login')}
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="text-xs xl:text-sm font-semibold text-emerald-100 hover:text-white px-3 py-1.5 rounded-lg hover:bg-emerald-900/50 transition-colors"
+                >
+                  {t('login', 'Login')}
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-4 py-2 rounded-lg bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-xs xl:text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5"
+                >
+                  <span>{t('getStarted', 'Get Started')}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             )}
-
-            {/* Get Started CTA */}
-            <button
-              onClick={() => {
-                if (onOpenTriage) {
-                  onOpenTriage();
-                } else {
-                  const el = document.getElementById('care-journey');
-                  el?.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className="px-4 py-2 rounded-lg bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-xs xl:text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5"
-            >
-              <span>{t('getStarted', 'Get Started')}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
           </div>
 
           {/* MOBILE MENU TRIGGER */}
@@ -261,15 +254,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTriage }) => {
                 >
                   {t('login', 'Login')}
                 </Link>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    if (onOpenTriage) onOpenTriage();
-                  }}
-                  className="py-2 text-center text-sm font-bold text-slate-950 bg-emerald-400 rounded-lg shadow-sm"
+                <Link
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-2 text-center text-sm font-bold text-slate-950 bg-emerald-400 rounded-lg shadow-sm flex items-center justify-center gap-1"
                 >
-                  {t('getStarted', 'Get Started')}
-                </button>
+                  <span>{t('getStarted', 'Get Started')}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
             )}
           </div>
