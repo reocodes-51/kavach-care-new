@@ -67,7 +67,7 @@ export const FeaturesSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-14 bg-white border-b border-slate-200">
+    <section id="features" className="py-14 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="max-w-3xl">

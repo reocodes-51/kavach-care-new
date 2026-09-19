@@ -12,7 +12,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenTriageModal, onE
   const { t } = useLanguage();
 
   return (
-    <section className="relative bg-[#F4F7FB] border-b border-slate-200 pt-8 pb-12 overflow-hidden">
+    <section id="home" className="relative bg-[#F4F7FB] border-b border-slate-200 pt-8 pb-12 overflow-hidden">
       {/* Subtle Background Pattern (Clean Government Grid) */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 pointer-events-none" />
 

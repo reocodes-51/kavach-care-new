@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { HeroSection } from '../components/home/HeroSection';
 import { ProblemSection } from '../components/home/ProblemSection';
 import { HowItWorksSection } from '../components/home/HowItWorksSection';
-import { FeaturesSection } from '../components/home/FeaturesSection';
-import { EcosystemSection } from '../components/home/EcosystemSection';
-import { RolePortalsSection } from '../components/home/RolePortalsSection';
 import { ReferralTracker } from '../components/home/ReferralTracker';
+import { FeaturesSection } from '../components/home/FeaturesSection';
+import { HealthcareNetworkSection } from '../components/home/HealthcareNetworkSection';
+import { EcosystemSection } from '../components/home/EcosystemSection';
 import { DistrictAnalytics } from '../components/home/DistrictAnalytics';
 import { AISafetySection } from '../components/home/AISafetySection';
 import { TriageWizardModal } from '../components/modals/TriageWizardModal';
@@ -15,69 +15,62 @@ import type { ReferralRecord } from '../types';
 interface HomePageProps {
   triageModalOpen: boolean;
   setTriageModalOpen: (open: boolean) => void;
-  customReferrals: ReferralRecord[];
-  onReferralCreated: (newRef: ReferralRecord) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
   triageModalOpen,
-  setTriageModalOpen,
-  customReferrals,
-  onReferralCreated,
+  setTriageModalOpen
 }) => {
   const [activeCreatedReferral, setActiveCreatedReferral] = useState<ReferralRecord | null>(null);
   const [slipModalOpen, setSlipModalOpen] = useState(false);
 
-  const handleCreated = (newRef: ReferralRecord) => {
-    onReferralCreated(newRef);
+  const handleReferralCreated = (newRef: ReferralRecord) => {
     setActiveCreatedReferral(newRef);
     setSlipModalOpen(true);
   };
 
   const scrollToHowItWorks = () => {
     const el = document.getElementById('how-it-works');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    el?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <div>
-      {/* Hero Section with Network Diagram */}
+    <div className="space-y-0">
+      {/* 1. #home */}
       <HeroSection
         onOpenTriageModal={() => setTriageModalOpen(true)}
         onExploreClick={scrollToHowItWorks}
       />
 
-      {/* 1. The Healthcare Problem */}
+      {/* 2. #problem */}
       <ProblemSection />
 
-      {/* 2. How KAVACH CARE Works (8 Steps) */}
+      {/* 3. #how-it-works */}
       <HowItWorksSection />
 
-      {/* 3. Key Features */}
+      {/* 4. #care-journey */}
+      <ReferralTracker />
+
+      {/* 5. #features */}
       <FeaturesSection />
 
-      {/* 4. Healthcare Ecosystem (ABHA, ABDM, eSanjeevani, NHM) */}
+      {/* 6. #healthcare-network */}
+      <HealthcareNetworkSection />
+
+      {/* 7. #ecosystem */}
       <EcosystemSection />
 
-      {/* 5. Role-Based Dashboards */}
-      <RolePortalsSection />
-
-      {/* 6. Referral Tracking (Live interactive tracker) */}
-      <ReferralTracker customReferrals={customReferrals} />
-
-      {/* 7. District Dashboard Preview (Recharts statistics) */}
+      {/* 8. #impact */}
       <DistrictAnalytics />
 
-      {/* 8. AI Safety & Clinical Governance */}
+      {/* 9. #about */}
       <AISafetySection />
 
-      {/* Interactive Triage Generator Modal */}
+      {/* Triage Wizard Modal */}
       <TriageWizardModal
         isOpen={triageModalOpen}
         onClose={() => setTriageModalOpen(false)}
-        onReferralCreated={handleCreated}
+        onReferralCreated={handleReferralCreated}
       />
 
       {/* Generated Referral Slip Modal */}

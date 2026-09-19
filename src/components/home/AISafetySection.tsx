@@ -6,7 +6,7 @@ export const AISafetySection: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <section className="py-14 bg-white border-b border-slate-200">
+    <section id="about" className="py-14 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Institutional Safety Banner */}
         <div className="bg-[#0B2540] text-white p-6 sm:p-8 rounded border-l-4 border-l-health-green shadow-xs">

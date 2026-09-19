@@ -1,22 +1,32 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAccessibility } from '../../context/AccessibilityContext';
-import { PhoneCall, Eye, Volume2, VolumeX } from 'lucide-react';
+import { PhoneCall, Eye, Mic, MicOff } from 'lucide-react';
 
 export const GovHeaderBar: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { textSize, setTextSize, highContrast, toggleHighContrast, isSpeaking, stopSpeaking, speakText } = useAccessibility();
+  const {
+    textSize,
+    setTextSize,
+    highContrast,
+    toggleHighContrast,
+    isListening,
+    startListening,
+    stopListening
+  } = useAccessibility();
 
-  const handleVoiceHelp = () => {
-    if (isSpeaking) {
-      stopSpeaking();
+  const handleVoiceToggle = () => {
+    if (isListening) {
+      stopListening();
     } else {
-      const speechContent = language === 'hi'
-        ? 'कवच केयर में आपका स्वागत है। यह राष्ट्रीय ग्रामीण स्वास्थ्य निरंतरता और रेफरल निगरानी मंच है। किसी भी आपातकाल के लिए 108 या 104 पर कॉल करें।'
-        : language === 'mr'
-        ? 'कवच केअर मध्ये आपले स्वागत आहे. हे राष्ट्रीय ग्रामीण आरोग्य रेफरल सातत्य व्यासपीठ आहे. कोणत्याही आपत्कालीन मदतीसाठी 108 वर कॉल करा.'
-        : 'Welcome to KAVACH CARE. National Rural Health Continuity and Closed-Loop Referral Platform. For emergency dial 108 or 104.';
-      speakText(speechContent, language === 'mr' ? 'mr-IN' : language === 'hi' ? 'hi-IN' : 'en-IN');
+      startListening((recognizedText) => {
+        // Find any search input or referral tracker on the page and fill it
+        const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.value = recognizedText;
+          searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
     }
   };
 
@@ -25,47 +35,62 @@ export const GovHeaderBar: React.FC = () => {
       {/* Tricolor Government Strip */}
       <div className="h-1 w-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex flex-wrap items-center justify-between gap-2">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-1.5 flex flex-wrap items-center justify-between gap-2">
         {/* Left: Official Government Affiliation */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-1.5 font-medium tracking-wide">
-            <span className="inline-block w-2 h-2 rounded-full bg-health-green animate-pulse" />
-            <span className="text-white font-semibold">{t('govIndia')}</span>
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-white font-semibold">भारत सरकार | Government of India</span>
             <span className="text-slate-400">|</span>
-            <span className="hidden md:inline text-slate-300">{t('moHfw')}</span>
+            <span className="hidden md:inline text-slate-300">MoHFW</span>
             <span className="hidden lg:inline text-slate-400">|</span>
-            <span className="hidden lg:inline text-emerald-300 font-medium">{t('nhm')}</span>
+            <span className="hidden lg:inline text-emerald-300 font-medium">NHM • ABDM</span>
           </div>
         </div>
 
         {/* Middle: Helplines Pill */}
-        <div className="hidden xl:flex items-center gap-2 bg-[#123B63] px-2.5 py-0.5 rounded border border-[#235587] text-[11px] text-slate-200">
+        <div className="hidden xl:flex items-center gap-3 bg-[#123B63] px-2.5 py-0.5 rounded border border-[#235587] text-[11px] text-slate-200">
           <PhoneCall className="w-3 h-3 text-[#FF9933]" />
           <span>{t('emergencyHelpline')}</span>
+          <span className="text-slate-400">|</span>
+          <span>{t('healthInfoHelpline')}</span>
+          <span className="text-slate-400">|</span>
+          <span>{t('maternalHelpline')}</span>
         </div>
 
         {/* Right: Accessibility & Language Controls */}
-        <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-          {/* Voice Assistance Button */}
+        <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+          {/* Voice Speech-to-Text Button */}
           <button
-            onClick={handleVoiceHelp}
-            title="Listen Page Info (Voice Assistant)"
-            className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] border transition-colors ${
-              isSpeaking
-                ? 'bg-amber-500 text-slate-950 border-amber-400 font-bold'
+            onClick={handleVoiceToggle}
+            title="Speech Recognition Assistant"
+            className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] border transition-all ${
+              isListening
+                ? 'bg-red-600 text-white border-red-500 font-bold animate-pulse shadow-xs'
                 : 'bg-[#123B63] hover:bg-[#1a4b7a] text-slate-200 border-[#2b5e91]'
             }`}
           >
-            {isSpeaking ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3 text-emerald-400" />}
-            <span className="hidden sm:inline">{isSpeaking ? 'Mute' : 'Voice'}</span>
+            {isListening ? (
+              <>
+                <Mic className="w-3.5 h-3.5 animate-bounce text-white" />
+                <span>{t('listening')}</span>
+              </>
+            ) : (
+              <>
+                <MicOff className="w-3 h-3 text-emerald-400" />
+                <span className="hidden sm:inline">{t('voiceAssistance')}</span>
+              </>
+            )}
           </button>
 
-          {/* Text Size Resizer (Standard GOI portal standard: A- A A+) */}
-          <div className="flex items-center bg-[#123B63] border border-[#2b5e91] rounded px-1 py-0.5 gap-1">
+          {/* Text Size Resizer: A- A A+ */}
+          <div className="flex items-center bg-[#123B63] border border-[#2b5e91] rounded px-1.5 py-0.5 gap-1.5 text-[11px]">
             <button
               onClick={() => setTextSize('sm')}
               aria-label="Decrease font size"
-              className={`px-1 rounded hover:bg-[#1f5080] ${textSize === 'sm' ? 'text-amber-400 font-bold' : 'text-slate-300'}`}
+              className={`px-1 rounded hover:bg-[#1f5080] transition-colors ${
+                textSize === 'sm' ? 'text-amber-400 font-bold underline' : 'text-slate-300'
+              }`}
             >
               A-
             </button>
@@ -73,7 +98,9 @@ export const GovHeaderBar: React.FC = () => {
             <button
               onClick={() => setTextSize('md')}
               aria-label="Standard font size"
-              className={`px-1 rounded hover:bg-[#1f5080] ${textSize === 'md' ? 'text-white font-bold' : 'text-slate-300'}`}
+              className={`px-1 rounded hover:bg-[#1f5080] transition-colors ${
+                textSize === 'md' ? 'text-white font-bold underline' : 'text-slate-300'
+              }`}
             >
               A
             </button>
@@ -81,30 +108,36 @@ export const GovHeaderBar: React.FC = () => {
             <button
               onClick={() => setTextSize('lg')}
               aria-label="Increase font size"
-              className={`px-1 rounded hover:bg-[#1f5080] ${textSize === 'lg' ? 'text-amber-400 font-bold' : 'text-slate-300'}`}
+              className={`px-1 rounded hover:bg-[#1f5080] transition-colors ${
+                textSize === 'lg' ? 'text-amber-400 font-bold underline' : 'text-slate-300'
+              }`}
             >
               A+
             </button>
           </div>
 
-          {/* Contrast Mode Toggle */}
+          {/* Contrast Toggle */}
           <button
             onClick={toggleHighContrast}
-            title="Toggle High Contrast"
-            className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[11px] ${
-              highContrast ? 'bg-amber-400 text-slate-900 border-amber-300 font-bold' : 'bg-[#123B63] border-[#2b5e91] text-slate-300 hover:text-white'
+            title="Toggle High Contrast Mode"
+            className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] transition-colors ${
+              highContrast
+                ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold'
+                : 'bg-[#123B63] border-[#2b5e91] text-slate-300 hover:text-white'
             }`}
           >
             <Eye className="w-3 h-3" />
             <span className="hidden sm:inline">{t('contrast')}</span>
           </button>
 
-          {/* Language Switcher (English | हिन्दी | मराठी) */}
+          {/* Language Switcher: English | हिन्दी | मराठी */}
           <div className="flex items-center bg-[#123B63] border border-[#2b5e91] rounded px-1 py-0.5 text-[11px] gap-1">
             <button
               onClick={() => setLanguage('en')}
-              className={`px-1.5 py-0.5 rounded font-medium ${
-                language === 'en' ? 'bg-[#FF9933] text-slate-950 font-bold' : 'text-slate-300 hover:text-white'
+              className={`px-1.5 py-0.5 rounded transition-colors ${
+                language === 'en'
+                  ? 'bg-[#FF9933] text-slate-950 font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white'
               }`}
             >
               English
@@ -112,8 +145,10 @@ export const GovHeaderBar: React.FC = () => {
             <span className="text-slate-500">|</span>
             <button
               onClick={() => setLanguage('hi')}
-              className={`px-1.5 py-0.5 rounded font-medium ${
-                language === 'hi' ? 'bg-[#FF9933] text-slate-950 font-bold' : 'text-slate-300 hover:text-white'
+              className={`px-1.5 py-0.5 rounded transition-colors ${
+                language === 'hi'
+                  ? 'bg-[#FF9933] text-slate-950 font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white'
               }`}
             >
               हिन्दी
@@ -121,8 +156,10 @@ export const GovHeaderBar: React.FC = () => {
             <span className="text-slate-500">|</span>
             <button
               onClick={() => setLanguage('mr')}
-              className={`px-1.5 py-0.5 rounded font-medium ${
-                language === 'mr' ? 'bg-[#FF9933] text-slate-950 font-bold' : 'text-slate-300 hover:text-white'
+              className={`px-1.5 py-0.5 rounded transition-colors ${
+                language === 'mr'
+                  ? 'bg-[#FF9933] text-slate-950 font-bold shadow-xs'
+                  : 'text-slate-300 hover:text-white'
               }`}
             >
               मराठी

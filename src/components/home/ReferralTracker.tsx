@@ -1,340 +1,305 @@
-import React, { useState } from 'react';
-import type { ReferralRecord, ReferralStatus } from '../../types';
-import { mockReferrals } from '../../data/mockReferrals';
+import React, { useState, useEffect } from 'react';
+import { referralService, type ReferralRecord } from '../../services/referralService';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   Search,
   CheckCircle2,
-  Clock,
   Printer,
   ShieldCheck,
-  QrCode
+  RefreshCw,
+  AlertCircle,
+  MapPin,
+  Phone
 } from 'lucide-react';
-import { UrgencyBadge, StatusBadge } from '../common/Badge';
-import { ReferralSlipModal } from '../modals/ReferralSlipModal';
 
 interface ReferralTrackerProps {
-  initialReferralId?: string;
-  customReferrals?: ReferralRecord[];
+  initialReferralCode?: string;
 }
 
 export const ReferralTracker: React.FC<ReferralTrackerProps> = ({
-  initialReferralId,
-  customReferrals = []
+  initialReferralCode
 }) => {
-  const allReferrals = [...customReferrals, ...mockReferrals];
+  const { t } = useLanguage();
+  const [referrals, setReferrals] = useState<ReferralRecord[]>([]);
+  const [selectedReferral, setSelectedReferral] = useState<ReferralRecord | null>(null);
+  const [searchQuery, setSearchQuery] = useState(initialReferralCode || 'REF-2024-MP-10482');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [searchQuery, setSearchQuery] = useState(initialReferralId || 'REF-2024-MH-8421');
-  const [selectedReferral, setSelectedReferral] = useState<ReferralRecord>(() => {
-    const found = allReferrals.find(r => r.id === (initialReferralId || 'REF-2024-MH-8421'));
-    return found || allReferrals[0];
-  });
-  const [modalOpen, setModalOpen] = useState(false);
+  const fetchReferrals = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await referralService.getReferrals();
+      if (data.referrals && data.referrals.length > 0) {
+        setReferrals(data.referrals);
+        const matched = data.referrals.find(
+          (r) => r.referralCode.toUpperCase() === searchQuery.trim().toUpperCase()
+        );
+        setSelectedReferral(matched || data.referrals[0]);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load referral tracking records');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReferrals();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const query = searchQuery.trim().toUpperCase();
-    const match = allReferrals.find(
-      r => r.id.toUpperCase() === query ||
-           r.abhaId.includes(query) ||
-           r.patientName.toUpperCase().includes(query)
+    const match = referrals.find(
+      (r) =>
+        r.referralCode.toUpperCase().includes(query) ||
+        (r.patient?.name && r.patient.name.toUpperCase().includes(query)) ||
+        (r.patient?.abhaId && r.patient.abhaId.includes(query))
     );
     if (match) {
       setSelectedReferral(match);
     } else {
-      alert(`No active referral found matching "${searchQuery}". Please select one of the sample demo IDs.`);
+      alert(`No referral found matching "${searchQuery}". Please select one of the available live records below.`);
     }
   };
 
-  const selectPreset = (ref: ReferralRecord) => {
-    setSearchQuery(ref.id);
-    setSelectedReferral(ref);
-  };
-
-  const statusList: ReferralStatus[] = [
-    'CREATED',
-    'ACCEPTED',
-    'APPOINTMENT',
-    'ARRIVAL',
-    'CONSULTATION',
-    'TREATMENT',
-    'FOLLOWUP',
-    'COMPLETED'
-  ];
-
-  const getStepIndex = (status: ReferralStatus) => statusList.indexOf(status);
-  const currentStepIndex = getStepIndex(selectedReferral.status);
 
   return (
-    <section id="referral-tracking" className="py-14 bg-white border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-blue-50 text-[#123B63] border border-blue-200 text-xs font-bold mb-2">
-              <QrCode className="w-3.5 h-3.5" />
-              <span>Real-Time Clinical Continuity Tracker</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#123B63] tracking-tight">
-              Closed-Loop Referral Tracking System
-            </h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Track patient milestones from frontline village screening to post-discharge ASHA home recovery
-            </p>
+    <section id="care-journey" className="py-16 bg-slate-50 border-t border-slate-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Closed-Loop Continuum Verification</span>
           </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            {t('careJourneyTitle', 'The Patient Referral Journey & Live Audit')}
+          </h2>
+          <p className="text-sm text-slate-600">
+            {t('careJourneySubtitle', 'Track real-time patient transit, hospital acceptance, specialist consultation, and ASHA home follow-up.')}
+          </p>
+        </div>
 
-          {/* Search Box */}
-          <form onSubmit={handleSearch} className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        {/* Search Bar & Live Presets */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-grow">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Enter Referral ID (e.g. REF-2024...)"
-                className="pl-9 pr-3 py-2 text-xs border border-slate-300 rounded w-64 focus:outline-none focus:ring-1 focus:ring-[#123B63] bg-slate-50 focus:bg-white"
+                placeholder={t('enterReferralCode', 'Enter Referral Code (e.g. REF-2024-MP-10482)...')}
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-600 focus:outline-none"
               />
             </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-[#123B63] hover:bg-[#0e2f50] text-white text-xs font-bold rounded shadow-xs"
+              className="px-6 py-2.5 bg-[#0F5B4E] hover:bg-[#0B3D34] text-white text-sm font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2"
             >
-              Verify & Track
+              <Search className="w-4 h-4" />
+              <span>{t('trackReferral', 'Track Referral')}</span>
             </button>
           </form>
+
+          {/* Preset Buttons */}
+          {referrals.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
+              <span className="text-slate-500 font-semibold">Live Database Records:</span>
+              {referrals.slice(0, 4).map((ref) => (
+                <button
+                  key={ref._id}
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery(ref.referralCode);
+                    setSelectedReferral(ref);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg border font-mono font-bold transition-colors ${
+                    selectedReferral?._id === ref._id
+                      ? 'bg-emerald-100 border-emerald-400 text-emerald-950 shadow-2xs'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {ref.referralCode} ({ref.patient?.name || 'Patient'})
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Demo Referral Case Quick Switchers */}
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-          <span className="font-semibold text-slate-500">Demo Active Records:</span>
-          {allReferrals.slice(0, 4).map((r) => (
+        {/* LOADING STATE */}
+        {loading && (
+          <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-3">
+            <RefreshCw className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
+            <p className="text-sm font-semibold text-slate-600">
+              {t('loadingReferrals', 'Loading referral tracking data from server...')}
+            </p>
+          </div>
+        )}
+
+        {/* ERROR STATE */}
+        {error && !loading && (
+          <div className="bg-red-50 border border-red-200 p-8 rounded-2xl text-center space-y-3">
+            <AlertCircle className="w-8 h-8 text-red-600 mx-auto" />
+            <p className="text-sm font-bold text-red-900">{error}</p>
             <button
-              key={r.id}
-              onClick={() => selectPreset(r)}
-              className={`px-2.5 py-1 rounded border text-xs font-medium transition-colors ${
-                selectedReferral.id === r.id
-                  ? 'bg-[#123B63] text-white border-[#123B63]'
-                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-300'
-              }`}
+              onClick={fetchReferrals}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-xs"
             >
-              <span className="font-mono font-bold mr-1">{r.id}</span>
-              <span>({r.patientName.split(' ')[0]} • {r.urgency})</span>
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>{t('retry', 'Retry Connection')}</span>
             </button>
-          ))}
-        </div>
+          </div>
+        )}
 
-        {/* Active Referral Card & 8-Step Tracker */}
-        <div className="mt-6 bg-slate-50 border border-slate-300 rounded shadow-sm overflow-hidden">
-          {/* Card Top Info Bar */}
-          <div className="bg-white p-5 border-b border-slate-200">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              {/* Patient Basic Info */}
-              <div className="flex items-start gap-3">
-                <div className="w-12 h-12 rounded bg-[#123B63] text-white flex items-center justify-center font-bold text-base flex-shrink-0">
-                  {selectedReferral.patientName.charAt(0)}
-                </div>
+        {/* SELECTED REFERRAL TIMELINE & DETAILS */}
+        {!loading && !error && selectedReferral && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left: Patient & Route Card */}
+            <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+              <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-bold text-slate-900">
-                      {selectedReferral.patientName}
-                    </h3>
-                    <UrgencyBadge urgency={selectedReferral.urgency} size="sm" />
-                    <StatusBadge status={selectedReferral.status} size="sm" />
-                  </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
-                    <span><strong>ABHA:</strong> <code className="font-mono text-[#123B63] font-bold">{selectedReferral.abhaId}</code></span>
-                    <span><strong>Age:</strong> {selectedReferral.age} Yrs ({selectedReferral.gender})</span>
-                    <span><strong>Origin:</strong> {selectedReferral.village}, {selectedReferral.block}</span>
-                    <span><strong>Token:</strong> <strong className="text-amber-800">{selectedReferral.tokenNumber}</strong></span>
-                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Official Referral Code
+                  </span>
+                  <h3 className="font-mono text-lg font-black text-[#0F5B4E]">
+                    {selectedReferral.referralCode}
+                  </h3>
+                </div>
+                <span
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                    selectedReferral.priority === 'EMERGENCY'
+                      ? 'bg-red-100 text-red-800 border border-red-300'
+                      : selectedReferral.priority === 'URGENT'
+                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  }`}
+                >
+                  {selectedReferral.priority}
+                </span>
+              </div>
+
+              {/* Patient Info */}
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 text-sm">
+                    {selectedReferral.patient?.name || 'Patient'}
+                  </span>
+                  <span className="font-mono text-emerald-800 font-semibold">
+                    {selectedReferral.patient?.kvcId || 'KVC-1024'}
+                  </span>
+                </div>
+                <div className="text-slate-600">
+                  {selectedReferral.patient?.age} yrs • {selectedReferral.patient?.gender} • Blood Group: {selectedReferral.patient?.bloodGroup || 'B+'}
+                </div>
+                <div className="text-slate-500 font-mono text-[11px]">
+                  ABHA: {selectedReferral.patient?.abhaId}
+                </div>
+                <div className="flex items-center gap-1 text-slate-500 pt-1">
+                  <MapPin className="w-3 h-3 text-slate-400" />
+                  <span>{selectedReferral.patient?.village}, {selectedReferral.patient?.district}</span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2">
+              {/* Clinical Referral Summary */}
+              <div className="space-y-2 text-xs">
+                <div className="font-bold text-slate-800">Specialty Required:</div>
+                <div className="p-2.5 bg-emerald-50 text-emerald-900 rounded-lg font-semibold border border-emerald-200">
+                  {selectedReferral.specialtyRequired}
+                </div>
+
+                <div className="font-bold text-slate-800 pt-1">Clinical Observation:</div>
+                <p className="text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200 leading-relaxed">
+                  {selectedReferral.clinicalSummary}
+                </p>
+
+                <div className="font-bold text-slate-800 pt-1">Provisional Diagnosis:</div>
+                <div className="text-slate-700 font-medium italic">
+                  "{selectedReferral.provisionalDiagnosis}"
+                </div>
+              </div>
+
+              {/* Transport Card */}
+              <div className="bg-blue-50 border border-blue-200 p-3.5 rounded-xl text-xs space-y-1">
+                <div className="font-bold text-blue-900 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>Transport Advice:</span>
+                </div>
+                <div className="text-blue-800 font-semibold">{selectedReferral.transportMode}</div>
+                <div className="text-blue-600 text-[11px]">{selectedReferral.ambulanceContact}</div>
+              </div>
+            </div>
+
+            {/* Right: Vertical 9-Stage Care Timeline */}
+            <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Care Continuity Progress Timeline
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Current Milestone:{' '}
+                    <strong className="text-emerald-700 font-bold">
+                      {selectedReferral.currentStatus}
+                    </strong>
+                  </p>
+                </div>
+
                 <button
-                  onClick={() => setModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-health-green hover:bg-health-green-dark text-white rounded text-xs font-bold shadow-xs"
+                  onClick={() => window.print()}
+                  className="px-3.5 py-1.5 border border-slate-300 hover:bg-slate-50 rounded-lg text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors no-print"
                 >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>View Official QR Slip</span>
+                  <Printer className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Print Slip</span>
                 </button>
               </div>
-            </div>
-          </div>
 
-          {/* 8-Stage Visual Timeline Progress */}
-          <div className="p-5 sm:p-6 bg-white border-b border-slate-200">
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">
-              Closed-Loop Clinical Progression (8 Stages)
-            </h4>
+              {/* Vertical Stepper */}
+              <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                {selectedReferral.timeline && selectedReferral.timeline.map((step, idx) => {
+                  const isCurrent = idx === selectedReferral.timeline.length - 1;
+                  return (
+                    <div key={idx} className="relative flex items-start gap-4 text-xs">
+                      {/* Circle Indicator */}
+                      <div
+                        className={`absolute -left-6 sm:-left-8 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-bold text-[11px] z-10 ${
+                          isCurrent
+                            ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 animate-pulse'
+                            : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        }`}
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
 
-            {/* Horizontal Timeline */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 relative">
-              {statusList.map((st, idx) => {
-                const isCompleted = idx <= currentStepIndex;
-                const isCurrent = idx === currentStepIndex;
-                const stepTimelineData = selectedReferral.timeline.find(t => t.status === st);
-
-                return (
-                  <div
-                    key={st}
-                    className={`p-2.5 rounded border text-left flex flex-col justify-between transition-all ${
-                      isCurrent
-                        ? 'bg-blue-50/80 border-[#123B63] ring-1 ring-[#123B63]'
-                        : isCompleted
-                        ? 'bg-emerald-50/50 border-emerald-300'
-                        : 'bg-slate-50 border-slate-200 opacity-60'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`text-[9px] font-bold px-1 rounded ${
-                          isCompleted ? 'bg-emerald-700 text-white' : 'bg-slate-300 text-slate-700'
-                        }`}>
-                          0{idx + 1}
-                        </span>
-                        {isCompleted ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-health-green" />
-                        ) : (
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex-grow space-y-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                          <span className="font-bold text-slate-900 text-sm">
+                            {step.label}
+                          </span>
+                          <span className="text-[11px] text-slate-400 font-medium">
+                            {new Date(step.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="text-slate-600 font-medium">
+                          Authorized by: <strong className="text-slate-800">{step.actorName}</strong>
+                        </div>
+                        {step.notes && (
+                          <div className="text-slate-500 text-[11px] bg-white p-2 rounded border border-slate-100 mt-1">
+                            {step.notes}
+                          </div>
                         )}
                       </div>
-
-                      <div className="text-[11px] font-bold text-slate-900 leading-tight">
-                        {stepTimelineData ? stepTimelineData.labelEn.split(' ')[0] : st}
-                      </div>
                     </div>
-
-                    <div className="text-[9px] text-slate-500 mt-2 line-clamp-1">
-                      {stepTimelineData?.timestamp || 'Pending'}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Detailed Two-Column Breakdown */}
-          <div className="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
-            {/* Left: Detailed Timeline Audit Log */}
-            <div className="lg:col-span-2 space-y-3">
-              <h4 className="font-bold text-slate-900 text-sm border-b border-slate-200 pb-2">
-                Facility & Milestones Audit Trail
-              </h4>
-
-              <div className="space-y-3">
-                {selectedReferral.timeline.map((step, i) => (
-                  <div
-                    key={i}
-                    className={`p-3 rounded border flex items-start gap-3 ${
-                      step.completed ? 'bg-white border-slate-200' : 'bg-slate-100/60 border-slate-200 opacity-60'
-                    }`}
-                  >
-                    <div className={`p-1.5 rounded mt-0.5 ${
-                      step.completed ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
-                    }`}>
-                      {step.completed ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900 text-xs">
-                          {step.labelEn}
-                        </span>
-                        <span className="text-[10px] font-medium text-slate-500">
-                          {step.timestamp}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-[#123B63] font-semibold mt-0.5">
-                        {step.facility} • <span className="text-slate-600">{step.actor}</span>
-                      </div>
-                      <div className="text-slate-600 text-[11px] mt-1">
-                        {step.remarks}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right: Clinical & Logistics Summary */}
-            <div className="space-y-4">
-              {/* Destination Facility Box */}
-              <div className="bg-white p-4 rounded border border-slate-200">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                  Assigned Destination Facility
-                </span>
-                <div className="font-bold text-slate-900 text-sm">
-                  {selectedReferral.targetFacility}
-                </div>
-                <div className="text-slate-600 text-xs mt-0.5">
-                  Dept: {selectedReferral.specialtyRequired}
-                </div>
-                <div className="mt-2 text-[11px] text-slate-700">
-                  <span className="font-semibold">Attending Doctor: </span>
-                  {selectedReferral.targetDoctorName || 'Duty Specialist'}
-                </div>
-                <div className="mt-1 text-[11px] text-slate-700">
-                  <span className="font-semibold">Transport: </span>
-                  {selectedReferral.transportType} ({selectedReferral.ashaAccompanied ? 'ASHA Accompanied' : 'Family Accompanied'})
-                </div>
-              </div>
-
-              {/* Clinical Snapshot */}
-              <div className="bg-white p-4 rounded border border-slate-200">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                  Provisional Clinical Impression
-                </span>
-                <div className="font-bold text-slate-900 text-xs p-2 bg-amber-50 rounded border border-amber-200 mb-2">
-                  {selectedReferral.provisionalDiagnosis}
-                </div>
-                <div className="text-[11px] text-slate-600 mb-2">
-                  {selectedReferral.clinicalSummary}
-                </div>
-                {selectedReferral.treatmentProvided && (
-                  <div className="border-t border-slate-100 pt-2 text-[11px]">
-                    <span className="font-bold text-slate-800">Treatment Provided: </span>
-                    <span className="text-slate-700">{selectedReferral.treatmentProvided}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Frontline ASHA Follow-up Loop */}
-              <div className="bg-emerald-50/70 p-4 rounded border border-emerald-200">
-                <div className="flex items-center gap-1.5 text-health-green font-bold text-xs mb-1">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>ASHA Home Verification Protocol</span>
-                </div>
-                <div className="text-[11px] text-slate-700 mb-2">
-                  Assigned Frontline Worker: <strong>{selectedReferral.referringAsha}</strong>
-                </div>
-                {selectedReferral.followUpTasks && (
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-600 uppercase block mb-1">
-                      Post-Discharge Checklist:
-                    </span>
-                    <ul className="space-y-1 text-[11px] text-slate-700">
-                      {selectedReferral.followUpTasks.map((t, idx) => (
-                        <li key={idx} className="flex items-start gap-1">
-                          <span className="text-health-green mt-0.5">•</span>
-                          <span>{t}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  );
+                })}
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
-
-      {/* Printable Referral Slip Modal */}
-      <ReferralSlipModal
-        referral={selectedReferral}
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-      />
     </section>
   );
 };
