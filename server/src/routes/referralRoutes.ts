@@ -10,7 +10,7 @@ import { protect, optionalAuth } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
-router.get('/track/:code', getReferralByCode);
+router.get('/track/:code', optionalAuth, getReferralByCode);
 router.get('/', optionalAuth, getReferrals);
 router.get('/:id', optionalAuth, getReferralById);
 router.post('/', protect, createReferral);

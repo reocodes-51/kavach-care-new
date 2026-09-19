@@ -35,6 +35,7 @@ export interface ReferralRecord {
   timeline: ReferralTimelineStep[];
   transportMode?: string;
   ambulanceContact?: string;
+  isRestricted?: boolean;
   createdAt: string;
 }
 
@@ -62,7 +63,7 @@ export const referralService = {
   },
 
   trackReferral: async (code: string) => {
-    const response = await api.get<{ success: boolean; referral: ReferralRecord }>(`/referrals/track/${code}`);
+    const response = await api.get<{ success: boolean; isRestricted?: boolean; referral: ReferralRecord }>(`/referrals/track/${code}`);
     return response.data;
   }
 };

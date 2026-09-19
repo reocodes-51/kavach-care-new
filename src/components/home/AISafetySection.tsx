@@ -20,7 +20,7 @@ export const AISafetySection: React.FC = () => {
                   Ethical AI & Clinical Governance Mandate
                 </span>
                 <h2 className="text-xl sm:text-2xl font-bold leading-tight">
-                  {t('safetyTitle')}
+                  {t('safetyTitle', 'Institutional Clinical Safety & Ethical AI Governance')}
                 </h2>
               </div>
             </div>
@@ -31,10 +31,10 @@ export const AISafetySection: React.FC = () => {
             </div>
           </div>
 
-          {/* Primary Safety Statement from User Spec */}
+          {/* Primary Safety Statement */}
           <div className="p-4 bg-[#123B63] rounded border border-[#255b91] mb-6">
-            <p className="text-base sm:text-lg font-bold text-amber-300 italic tracking-wide">
-              "{t('safetyNotice')}"
+            <p className="text-sm sm:text-base font-bold text-amber-300 italic tracking-wide">
+              "{t('safetyNotice', 'AI assists healthcare workflows with symptom prioritization. All final clinical diagnosis and treatment decisions remain strictly with licensed medical professionals.')}"
             </p>
           </div>
 
@@ -46,7 +46,7 @@ export const AISafetySection: React.FC = () => {
                 <span>Deterministic ICMR Protocols</span>
               </div>
               <p className="leading-relaxed text-slate-300">
-                {t('safetyP1')}
+                {t('safetyP1', 'Algorithmic prioritization adheres to deterministic Indian Council of Medical Research (ICMR) Standard Treatment Guidelines without speculative reasoning.')}
               </p>
               <div className="mt-3 pt-2 border-t border-[#1b4e80] text-[11px] text-emerald-300 font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -60,7 +60,7 @@ export const AISafetySection: React.FC = () => {
                 <span>Mandatory Human-in-the-Loop</span>
               </div>
               <p className="leading-relaxed text-slate-300">
-                {t('safetyP2')}
+                {t('safetyP2', 'Every referral slip, emergency triage tag, and transfer order requires clinical verification and authorization by a registered medical practitioner.')}
               </p>
               <div className="mt-3 pt-2 border-t border-[#1b4e80] text-[11px] text-emerald-300 font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -74,7 +74,7 @@ export const AISafetySection: React.FC = () => {
                 <span>Data Privacy & Consent</span>
               </div>
               <p className="leading-relaxed text-slate-300">
-                {t('safetyP3')}
+                {t('safetyP3', 'Built in compliance with the Digital Personal Data Protection (DPDP) Act 2023. Patient records and health data are sovereign, encrypted, and require explicit consent.')}
               </p>
               <div className="mt-3 pt-2 border-t border-[#1b4e80] text-[11px] text-emerald-300 font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />

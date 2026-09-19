@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { HeroSection } from '../components/home/HeroSection';
-import { ProblemSection } from '../components/home/ProblemSection';
-import { HowItWorksSection } from '../components/home/HowItWorksSection';
 import { ReferralTracker } from '../components/home/ReferralTracker';
-import { FeaturesSection } from '../components/home/FeaturesSection';
+import { HowItWorksSection } from '../components/home/HowItWorksSection';
 import { HealthcareNetworkSection } from '../components/home/HealthcareNetworkSection';
-import { EcosystemSection } from '../components/home/EcosystemSection';
-import { DistrictAnalytics } from '../components/home/DistrictAnalytics';
 import { AISafetySection } from '../components/home/AISafetySection';
 import { TriageWizardModal } from '../components/modals/TriageWizardModal';
 import { ReferralSlipModal } from '../components/modals/ReferralSlipModal';
@@ -36,34 +32,22 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className="space-y-0">
-      {/* 1. #home */}
+      {/* 1. Official National Hero Banner (#home) */}
       <HeroSection
         onOpenTriageModal={() => setTriageModalOpen(true)}
         onExploreClick={scrollToHowItWorks}
       />
 
-      {/* 2. #problem */}
-      <ProblemSection />
-
-      {/* 3. #how-it-works */}
-      <HowItWorksSection />
-
-      {/* 4. #care-journey */}
+      {/* 2. Primary Public Citizen Service: Referral Tracking & Care Journey (#care-journey) */}
       <ReferralTracker />
 
-      {/* 5. #features */}
-      <FeaturesSection />
+      {/* 3. Operational Protocol: 4-Tier Healthcare Continuum (#how-it-works) */}
+      <HowItWorksSection />
 
-      {/* 6. #healthcare-network */}
+      {/* 4. Public Healthcare Network & Hospital Bed Registry (#healthcare-network) */}
       <HealthcareNetworkSection />
 
-      {/* 7. #ecosystem */}
-      <EcosystemSection />
-
-      {/* 8. #impact */}
-      <DistrictAnalytics />
-
-      {/* 9. #about */}
+      {/* 5. Clinical Safety & Legal Governance (#about) */}
       <AISafetySection />
 
       {/* Triage Wizard Modal */}

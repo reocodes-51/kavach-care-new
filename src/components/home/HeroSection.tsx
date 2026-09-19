@@ -1,8 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { Stethoscope, ArrowRight, ShieldCheck, CheckCircle2, HeartHandshake, Building2 } from 'lucide-react';
-import { NetworkDiagram } from '../common/NetworkDiagram';
-
 interface HeroSectionProps {
   onOpenTriageModal: () => void;
   onExploreClick: () => void;
@@ -130,9 +128,26 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenTriageModal, onE
           </div>
         </div>
 
-        {/* Network Diagram Showcase */}
-        <div className="mt-10">
-          <NetworkDiagram />
+        {/* Official Institutional Initiative Ribbon */}
+        <div className="mt-8 pt-6 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500 font-medium">
+          <span className="text-[11px] font-bold text-[#123B63] uppercase tracking-wider flex items-center gap-1.5">
+            <Building2 className="w-3.5 h-3.5 text-emerald-700" />
+            <span>National Digital Health Interoperability:</span>
+          </span>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[11px] text-slate-600">
+            <span className="px-2.5 py-1 bg-white rounded border border-slate-200 shadow-2xs font-semibold">
+              National Health Mission (NHM)
+            </span>
+            <span className="px-2.5 py-1 bg-white rounded border border-slate-200 shadow-2xs font-semibold">
+              Ayushman Bharat Digital Mission (ABDM)
+            </span>
+            <span className="px-2.5 py-1 bg-white rounded border border-slate-200 shadow-2xs font-semibold">
+              e-Sanjeevani Tele-Consultation
+            </span>
+            <span className="px-2.5 py-1 bg-white rounded border border-slate-200 shadow-2xs font-semibold">
+              108 / 102 Emergency Dispatch
+            </span>
+          </div>
         </div>
       </div>
     </section>

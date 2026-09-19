@@ -18,10 +18,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
   const navItems = [
     { id: 'home', label: t('navHome', 'Home'), href: '#home' },
-    { id: 'how-it-works', label: t('navHowItWorks', 'How It Works'), href: '#how-it-works' },
     { id: 'care-journey', label: t('navCareJourney', 'Care Journey'), href: '#care-journey' },
+    { id: 'how-it-works', label: t('navHowItWorks', 'How It Works'), href: '#how-it-works' },
     { id: 'healthcare-network', label: t('navNetwork', 'Healthcare Network'), href: '#healthcare-network' },
-    { id: 'features', label: t('navFeatures', 'Features'), href: '#features' },
     { id: 'about', label: t('navAbout', 'About'), href: '#about' }
   ];
 
